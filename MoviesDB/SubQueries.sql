@@ -1,0 +1,163 @@
+--1. Write a query in SQL to list all the information of the actors who played a role in the movie 'Annie Hall'.
+--SELECT * FROM Movies.Actor A
+--WHERE A.act_id IN(
+--	SELECT C.act_id FROM Movies.Movie_cast C
+--	WHERE C.mov_id IN(
+--		SELECT B.mov_id FROM Movies.Movie B
+--		WHERE B.mov_title = 'Annie Hall'));
+
+--2. Write a query in SQL to find the name of the director (first and last names) 
+--who directed a movie that casted a role for 'Eyes Wide Shut'. (using subquery)
+--SELECT C.dir_fname, C.dir_lname FROM Movies.Director C
+--WHERE C.dir_id IN (
+--	SELECT A.dir_id FROM Movies.Movie_Direction A
+--	WHERE A.mov_id  IN(
+--		SELECT B.mov_id FROM Movies.Movie B
+--		WHERE B.mov_title = 'Eyes Wide Shut'));
+
+--3. Write a query in SQL to list all the movies which released in the country other than UK.
+--SELECT * FROM Movies.Movie A
+--WHERE A.mov_rel_country NOT LIKE 'UK   ;'
+
+--4. Write a query in SQL to find the movie title, year, date of release, director and actor for those movies which reviewer is unknown.
+--SELECT A.mov_title, A.mov_year, A.mov_dt_rel,
+--	CONCAT(C.dir_fname, ' ' ,C.dir_lname) AS DirectorName,
+--	CONCAT(E.act_fname, ' ', E.act_lname) AS ActorName, D.role
+--	FROM Movies.Movie A,
+--		Movies.Movie_Direction B,
+--		Movies.Director C,
+--		Movies.Movie_cast D,
+--		Movies.Actor E
+--WHERE D.mov_id = A.mov_id
+--	AND	D.act_id = E.act_id
+--	AND C.dir_id = B.dir_id
+--	AND B.mov_id = A.mov_id
+--	AND A.mov_id IN (
+--		SELECT C.mov_id FROM Movies.Rating C
+--		WHERE C.rev_id IN (
+--			SELECT B.rev_id FROM Movies.Reviewer B
+--			WHERE B.rev_name IS NULL));
+
+--5. Write a query in SQL to find the titles of all movies directed by the director whose first and last name are Woddy Allen.
+--SELECT C.mov_title FROM Movies.Movie C
+--WHERE C.mov_id IN (
+--	SELECT B.mov_id FROM  Movies.Movie_Direction B
+--	WHERE B.dir_id IN (
+--			SELECT A.dir_id FROM Movies.Director A
+--			WHERE A.dir_fname = 'Woody' AND A.dir_lname = 'Allen'));
+
+--6. Write a query in SQL to find all the years which produced at least one movie and
+--that received a rating of more than 8 stars. Show the results in increasing order.
+--SELECT * FROM Movies.Movie C
+--WHERE C.mov_id IN (
+--		SELECT B.mov_id FROM Movies.Rating B
+--		WHERE B.rev_stars > 8)
+--	AND
+--	C.mov_year IN (
+--		SELECT A.mov_year AS Quantity FROM Movies.Movie A
+--		GROUP BY A.mov_year
+--		HAVING COUNT(A.mov_year) > 1);
+
+--7. Write a query in SQL to find the titles of all movies that have no ratings.
+--SELECT B.mov_title FROM Movies.Movie B
+--WHERE B.mov_id NOT IN(
+--	SELECT A.mov_id FROM Movies.Rating A);
+
+--8. Write a query in SQL to find the names of all reviewers who have ratings with a NULL value. 
+--SELECT B.rev_name FROM Movies.Reviewer B
+--WHERE B.rev_id IN(
+--	SELECT A.rev_id FROM Movies.Rating A
+--	WHERE A.rev_stars IS NULL);
+
+--9. Write a query in SQL to return the reviewer name, movie title, and stars for those movies which reviewed 
+--by a reviewer and must be rated. Sort the result by reviewer name, movie title, and number of stars, SELECT ONLY ROWS WITHOUT NULL.
+--SELECT C.rev_name,
+--	B.mov_title,
+--	A.rev_stars
+--FROM Movies.Rating A,
+--	Movies.Movie B,
+--	Movies.Reviewer C
+--WHERE A.mov_id = B.mov_id
+--	AND A.rev_id = C.rev_id
+--	AND A.rev_stars IS NOT NULL
+--	AND C.rev_name IS NOT NULL
+--ORDER BY C.rev_name ASC,
+--	B.mov_title ASC,
+--	A.rev_stars ASC;
+
+--10. Write a query in SQL to find the reviewer's name and the title of the movie for those reviewers who rated more than one movies.
+--SELECT B.rev_name,
+--	C.mov_title
+--FROM Movies.Rating A, 
+--	Movies.Reviewer B,
+--	Movies.Movie C
+--WHERE A.mov_id = C.mov_id
+--	AND A.rev_id = B.rev_id
+--	AND C.mov_id = A.mov_id
+--	AND A.rev_id IN (
+--		SELECT A.rev_id FROM Movies.Rating A
+--		GROUP BY A.rev_id
+--		HAVING COUNT(A.rev_id) > 1);
+
+--11. Write a query in SQL to find the movie title, and the highest number of stars that movie received and arranged 
+--the result according to the group of a movie and the movie title appear alphabetically in ascending order.
+--SELECT B.mov_title, MAX(A.rev_stars) AS MaxReview
+--FROM Movies.Rating A,
+--	Movies.Movie B
+--WHERE A.mov_id = B.mov_id
+--	AND A.rev_stars IS NOT NULL
+--GROUP BY B.mov_title
+--ORDER BY B.mov_title ASC;
+
+--12. Write a query in SQL to find the names of all reviewers who rated the movie American Beauty.
+--SELECT B.rev_name 
+--FROM Movies.Movie A,
+--	Movies.Reviewer B,
+--	Movies.Rating C
+--WHERE A.mov_id = C.mov_id
+--	AND B.rev_id = C.rev_id
+--	AND A.mov_title = 'American Beauty';
+
+--13. Write a query in SQL to find the titles of all movies which have been reviewed by anybody except by Paul Monks. 
+--SELECT C.mov_title, A.rev_name
+--FROM Movies.Reviewer A,
+--	Movies.Rating B,
+--	Movies.Movie C
+--WHERE A.rev_id = B.rev_id
+--	AND C.mov_id = B.mov_id
+--	AND A.rev_name  !=  'Paul Monks';
+
+--14. Write a query in SQL to return the reviewer name, movie title, and number of stars for those movies which rating is the lowest one.
+--SELECT TOP(1) B.rev_name, 
+--	A.mov_title,
+--	C.rev_stars
+--FROM Movies.Movie A,
+--	Movies.Reviewer B,
+--	Movies.Rating C
+--WHERE A.mov_id = C.mov_id
+--	AND B.rev_id = C.rev_id
+--	AND C.rev_stars IS NOT NULL
+--ORDER BY C.rev_stars ASC;
+
+--15. Write a query in SQL to find the titles of all movies directed by James Cameron.
+--SELECT A.mov_title
+--FROM Movies.Movie A,
+--	Movies.Movie_Direction B,
+--	Movies.Director C
+--WHERE A.mov_id = B.mov_id
+--	AND B.dir_id = C.dir_id
+--	AND C.dir_fname = 'James'
+--	AND C.dir_lname = 'Cameron';
+
+--16. Write a query in SQL to find the name of those movies where one or more actors acted in two or more movies.
+--SELECT B.mov_title
+--FROM Movies.Movie B,
+--	Movies.Actor C,
+--	Movies.Movie_cast D
+--WHERE C.act_id IN (
+--	SELECT A.act_id
+--	FROM Movies.Movie_cast A
+--	GROUP BY A.act_id
+--	HAVING COUNT(A.act_id) > 1)
+--	AND C.act_id = D.act_id
+--	AND B.mov_id = D.mov_id;
